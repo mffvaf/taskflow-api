@@ -4,6 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.logs import logger
 from app.models import User
 from app.schemas import UserCreate, UserRead, UserUpdate
 
@@ -28,6 +29,7 @@ def save_changes(db: Session) -> None:
         db.commit()
     except IntegrityError:
         db.rollback()
+        logger.warning("Database constraint conflict: users")
         raise HTTPException(
             status_code=409,
             detail=(
@@ -39,9 +41,7 @@ def save_changes(db: Session) -> None:
 
 @router.get("", response_model=list[UserRead])
 def list_users(db: Session = Depends(get_db)):
-    return db.scalars(
-        select(User).order_by(User.id)
-    ).all()
+    return db.scalars(select(User).order_by(User.id)).all()
 
 
 @router.get("/{user_id}", response_model=UserRead)
@@ -71,9 +71,7 @@ def update_user(
 ):
     user = find_user(user_id, db)
 
-    for field, value in payload.model_dump(
-        exclude_unset=True
-    ).items():
+    for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(user, field, value)
 
     save_changes(db)

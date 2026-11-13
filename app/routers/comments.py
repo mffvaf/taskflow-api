@@ -4,6 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.logs import logger
 from app.models import Comment
 from app.schemas import CommentCreate, CommentRead, CommentUpdate
 
@@ -28,11 +29,11 @@ def save_changes(db: Session) -> None:
         db.commit()
     except IntegrityError:
         db.rollback()
+        logger.warning("Database constraint conflict: comments")
         raise HTTPException(
             status_code=409,
             detail=(
-                "Конфликт данных: проверьте существование "
-                "задачи и автора комментария"
+                "Конфликт данных: проверьте существование задачи и автора комментария"
             ),
         )
 
@@ -80,9 +81,7 @@ def update_comment(
 ):
     comment = find_comment(comment_id, db)
 
-    for field, value in payload.model_dump(
-        exclude_unset=True
-    ).items():
+    for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(comment, field, value)
 
     save_changes(db)

@@ -4,6 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.logs import logger
 from app.models import Project
 from app.schemas import ProjectCreate, ProjectRead, ProjectUpdate
 
@@ -28,6 +29,7 @@ def save_changes(db: Session) -> None:
         db.commit()
     except IntegrityError:
         db.rollback()
+        logger.warning("Database constraint conflict: projects")
         raise HTTPException(
             status_code=409,
             detail="Конфликт ограничений базы данных",
@@ -36,9 +38,7 @@ def save_changes(db: Session) -> None:
 
 @router.get("", response_model=list[ProjectRead])
 def list_projects(db: Session = Depends(get_db)):
-    return db.scalars(
-        select(Project).order_by(Project.id)
-    ).all()
+    return db.scalars(select(Project).order_by(Project.id)).all()
 
 
 @router.get("/{project_id}", response_model=ProjectRead)
@@ -71,9 +71,7 @@ def update_project(
 ):
     project = find_project(project_id, db)
 
-    for field, value in payload.model_dump(
-        exclude_unset=True
-    ).items():
+    for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(project, field, value)
 
     save_changes(db)

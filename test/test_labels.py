@@ -23,10 +23,7 @@ def test_label_crud(client):
 
     response = client.get("/v1/labels")
     assert response.status_code == 200
-    assert any(
-        item["id"] == label["id"]
-        for item in response.json()
-    )
+    assert any(item["id"] == label["id"] for item in response.json())
 
     response = client.patch(
         path,

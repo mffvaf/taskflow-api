@@ -4,6 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.logs import logger
 from app.models import Task
 from app.schemas import TaskCreate, TaskRead, TaskStatus, TaskUpdate
 
@@ -28,11 +29,11 @@ def save_changes(db: Session) -> None:
         db.commit()
     except IntegrityError:
         db.rollback()
+        logger.warning("Database constraint conflict: tasks")
         raise HTTPException(
             status_code=409,
             detail=(
-                "Конфликт данных: проверьте существование "
-                "проекта, исполнителя и метки"
+                "Конфликт данных: проверьте существование проекта, исполнителя и метки"
             ),
         )
 
@@ -84,9 +85,7 @@ def update_task(
 ):
     task = find_task(task_id, db)
 
-    for field, value in payload.model_dump(
-        exclude_unset=True
-    ).items():
+    for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(task, field, value)
 
     save_changes(db)

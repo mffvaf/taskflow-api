@@ -18,6 +18,7 @@ services:
   api:
     build: .
     environment:
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
       DATABASE_URL: postgresql+psycopg://taskflow:${POSTGRES_PASSWORD}@db:5432/taskflow
     ports:
       - "8000:8000"

@@ -14,16 +14,19 @@ ROOT = Path(__file__).resolve().parents[1]
 
 # Берём настройки подключения, но меняем название базы.
 env = dotenv_values(ROOT / ".env")
-database_url = make_url(env["DATABASE_URL"])
-test_url = database_url.set(database="taskflow_test")
+if url_from_ci := os.getenv("TEST_DATABASE_URL"):
+    test_url = make_url(url_from_ci)
+else:
+    test_url = make_url(env["DATABASE_URL"]).set(database="taskflow_test")
 
-os.environ["DATABASE_URL"] = test_url.render_as_string(
-    hide_password=False
-)
+if test_url.database != "taskflow_test":
+    raise RuntimeError("Tests require the taskflow_test database")
+
+os.environ["DATABASE_URL"] = test_url.render_as_string(hide_password=False)
 
 # Импортируем приложение после выбора тестовой базы.
-from app.database import engine, get_db
-from app.main import app
+from app.database import engine, get_db  # noqa: E402
+from app.main import app  # noqa: E402
 
 
 @pytest.fixture(scope="session", autouse=True)

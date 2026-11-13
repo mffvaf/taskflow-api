@@ -4,6 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.logs import logger
 from app.models import Label
 from app.schemas import LabelCreate, LabelRead, LabelUpdate
 
@@ -28,6 +29,7 @@ def save_changes(db: Session) -> None:
         db.commit()
     except IntegrityError:
         db.rollback()
+        logger.warning("Database constraint conflict: labels")
         raise HTTPException(
             status_code=409,
             detail="Конфликт данных: название метки уже существует",
@@ -36,9 +38,7 @@ def save_changes(db: Session) -> None:
 
 @router.get("", response_model=list[LabelRead])
 def list_labels(db: Session = Depends(get_db)):
-    return db.scalars(
-        select(Label).order_by(Label.id)
-    ).all()
+    return db.scalars(select(Label).order_by(Label.id)).all()
 
 
 @router.get("/{label_id}", response_model=LabelRead)
@@ -71,9 +71,7 @@ def update_label(
 ):
     label = find_label(label_id, db)
 
-    for field, value in payload.model_dump(
-        exclude_unset=True
-    ).items():
+    for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(label, field, value)
 
     save_changes(db)

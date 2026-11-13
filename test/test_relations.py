@@ -56,20 +56,12 @@ def test_delete_project_cascades(client, records):
     response = client.delete(f"/v1/projects/{project_id}")
 
     assert response.status_code == 204
-    assert client.get(
-        f"/v1/tasks/{task_id}"
-    ).status_code == 404
-    assert client.get(
-        f"/v1/comments/{comment_id}"
-    ).status_code == 404
+    assert client.get(f"/v1/tasks/{task_id}").status_code == 404
+    assert client.get(f"/v1/comments/{comment_id}").status_code == 404
 
     # Пользователь и метка должны сохраниться.
-    assert client.get(
-        f"/v1/users/{records['user']['id']}"
-    ).status_code == 200
-    assert client.get(
-        f"/v1/labels/{records['label']['id']}"
-    ).status_code == 200
+    assert client.get(f"/v1/users/{records['user']['id']}").status_code == 200
+    assert client.get(f"/v1/labels/{records['label']['id']}").status_code == 200
 
 
 def test_delete_task_cascades(client, records):
@@ -79,12 +71,8 @@ def test_delete_task_cascades(client, records):
     response = client.delete(f"/v1/tasks/{task_id}")
 
     assert response.status_code == 204
-    assert client.get(
-        f"/v1/comments/{comment_id}"
-    ).status_code == 404
-    assert client.get(
-        f"/v1/projects/{records['project']['id']}"
-    ).status_code == 200
+    assert client.get(f"/v1/comments/{comment_id}").status_code == 404
+    assert client.get(f"/v1/projects/{records['project']['id']}").status_code == 200
 
 
 def test_cannot_delete_comment_author(client, records):
@@ -95,12 +83,8 @@ def test_cannot_delete_comment_author(client, records):
     assert response.status_code == 409
 
     # После конфликта записи остаются доступными.
-    assert client.get(
-        f"/v1/users/{user_id}"
-    ).status_code == 200
-    assert client.get(
-        f"/v1/comments/{records['comment']['id']}"
-    ).status_code == 200
+    assert client.get(f"/v1/users/{user_id}").status_code == 200
+    assert client.get(f"/v1/comments/{records['comment']['id']}").status_code == 200
 
 
 def test_delete_assignee_sets_null(client, records):
@@ -110,13 +94,9 @@ def test_delete_assignee_sets_null(client, records):
 
     # Сначала удаляем комментарий, иначе автора
     # нельзя удалить из-за ограничения RESTRICT.
-    assert client.delete(
-        f"/v1/comments/{comment_id}"
-    ).status_code == 204
+    assert client.delete(f"/v1/comments/{comment_id}").status_code == 204
 
-    assert client.delete(
-        f"/v1/users/{user_id}"
-    ).status_code == 204
+    assert client.delete(f"/v1/users/{user_id}").status_code == 204
 
     response = client.get(f"/v1/tasks/{task_id}")
 
@@ -129,9 +109,7 @@ def test_delete_label_sets_null(client, records):
     label_id = records["label"]["id"]
     task_id = records["task"]["id"]
 
-    assert client.delete(
-        f"/v1/labels/{label_id}"
-    ).status_code == 204
+    assert client.delete(f"/v1/labels/{label_id}").status_code == 204
 
     response = client.get(f"/v1/tasks/{task_id}")
 
@@ -158,12 +136,8 @@ def test_task_rejects_missing_relation(
     missing_id = records[record_name]["id"]
     task_id = records["task"]["id"]
 
-    assert client.delete(
-        f"/v1/comments/{comment_id}"
-    ).status_code == 204
-    assert client.delete(
-        f"/v1/{resource}/{missing_id}"
-    ).status_code == 204
+    assert client.delete(f"/v1/comments/{comment_id}").status_code == 204
+    assert client.delete(f"/v1/{resource}/{missing_id}").status_code == 204
 
     # Нельзя создать задачу с удалённой связанной записью.
     response = client.post(

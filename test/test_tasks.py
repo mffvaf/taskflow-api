@@ -42,10 +42,7 @@ def test_task_crud(client, project):
 
     response = client.get("/v1/tasks")
     assert response.status_code == 200
-    assert any(
-        item["id"] == task["id"]
-        for item in response.json()
-    )
+    assert any(item["id"] == task["id"] for item in response.json())
 
     response = client.patch(
         path,
@@ -102,9 +99,7 @@ def test_task_filters(client, project):
         },
     )
     assert response.status_code == 200
-    assert [item["id"] for item in response.json()] == [
-        opened["id"]
-    ]
+    assert [item["id"] for item in response.json()] == [opened["id"]]
 
     response = client.get(
         "/v1/tasks",
@@ -166,9 +161,7 @@ def test_task_missing_project(client):
     assert response.status_code == 201
     project_id = response.json()["id"]
 
-    assert client.delete(
-        f"/v1/projects/{project_id}"
-    ).status_code == 204
+    assert client.delete(f"/v1/projects/{project_id}").status_code == 204
 
     response = client.post(
         "/v1/tasks",

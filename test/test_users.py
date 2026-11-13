@@ -28,10 +28,7 @@ def test_user_crud(client):
 
     response = client.get("/v1/users")
     assert response.status_code == 200
-    assert any(
-        item["id"] == user_id
-        for item in response.json()
-    )
+    assert any(item["id"] == user_id for item in response.json())
 
     response = client.patch(
         f"/v1/users/{user_id}",

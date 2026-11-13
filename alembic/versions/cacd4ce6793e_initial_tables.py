@@ -181,12 +181,8 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.execute(
-        "DROP TRIGGER tasks_touch_updated_at ON tasks"
-    )
-    op.execute(
-        "DROP FUNCTION taskflow_touch_updated_at()"
-    )
+    op.execute("DROP TRIGGER tasks_touch_updated_at ON tasks")
+    op.execute("DROP FUNCTION taskflow_touch_updated_at()")
 
     op.drop_table("comments")
     op.drop_table("tasks")

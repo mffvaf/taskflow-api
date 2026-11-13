@@ -1,6 +1,6 @@
 from alembic import context
 from sqlalchemy import create_engine
-from app import models
+from app import models  # noqa: F401
 from app.config import settings
 from app.database import Base
 

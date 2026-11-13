@@ -65,6 +65,7 @@ class ProjectRead(BaseModel):
     description: str | None
     created_at: datetime
 
+
 LabelName = Annotated[
     str,
     Field(min_length=1, max_length=64),
@@ -92,6 +93,7 @@ class LabelRead(BaseModel):
     id: int
     name: str
     color: str
+
 
 PositiveId = Annotated[int, Field(gt=0)]
 
@@ -137,6 +139,7 @@ class TaskRead(BaseModel):
     priority: TaskPriority
     created_at: datetime
     updated_at: datetime
+
 
 CommentBody = Annotated[
     str,

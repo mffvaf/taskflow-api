@@ -26,10 +26,7 @@ def test_project_crud(client):
 
     response = client.get("/v1/projects")
     assert response.status_code == 200
-    assert any(
-        item["id"] == project["id"]
-        for item in response.json()
-    )
+    assert any(item["id"] == project["id"] for item in response.json())
 
     response = client.patch(
         path,

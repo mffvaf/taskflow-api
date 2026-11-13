@@ -153,3 +153,34 @@ python -m pytest -v
 Проверяются операции со всеми пятью ресурсами, фильтры,
 валидация данных, ошибки 404 и 409, обновление даты задачи
 и правила удаления связанных записей.
+## CI
+
+GitHub Actions запускает три проверки при push и pull request:
+стиль (Ruff), статический анализ (Bandit) и тесты (pytest).
+У тестов отдельный PostgreSQL 16. Результаты видны во вкладке Actions.
+
+Проверки стиля и анализа можно запустить локально:
+
+```bash
+python -m pip install -r requirements-dev.txt
+python -m ruff format --check app alembic test
+python -m ruff check app alembic test
+python -m bandit -r app alembic
+```
+
+## Логи
+
+Уровень логирования приложения задаётся в `.env`: `LOG_LEVEL=INFO`
+по умолчанию. Чтобы видеть запросы, укажите `LOG_LEVEL=DEBUG`.
+После изменения настроек пересоздайте контейнер API:
+
+```bash
+docker compose up -d --force-recreate api
+docker compose logs -f api
+```
+
+- DEBUG — метод, маршрут и код ответа.
+- INFO — запуск и остановка API.
+- WARNING — конфликт ограничений базы данных.
+- ERROR — сбой проверки соединения или необработанная ошибка запроса.
+- CRITICAL — база недоступна при старте, API не может запуститься.

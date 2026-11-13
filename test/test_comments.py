@@ -63,10 +63,7 @@ def test_comment_crud(client, comment_data):
 
     response = client.get("/v1/comments")
     assert response.status_code == 200
-    assert any(
-        item["id"] == comment["id"]
-        for item in response.json()
-    )
+    assert any(item["id"] == comment["id"] for item in response.json())
 
     response = client.patch(
         path,
@@ -170,9 +167,7 @@ def test_comment_update_rejects_null(
 def test_comment_missing_author(client, comment_data):
     author_id = comment_data["author_id"]
 
-    assert client.delete(
-        f"/v1/users/{author_id}"
-    ).status_code == 204
+    assert client.delete(f"/v1/users/{author_id}").status_code == 204
 
     response = client.post(
         "/v1/comments",
@@ -189,9 +184,7 @@ def test_comment_missing_author(client, comment_data):
 def test_comment_missing_task(client, comment_data):
     task_id = comment_data["task_id"]
 
-    assert client.delete(
-        f"/v1/tasks/{task_id}"
-    ).status_code == 204
+    assert client.delete(f"/v1/tasks/{task_id}").status_code == 204
 
     response = client.post(
         "/v1/comments",
